@@ -2,7 +2,14 @@
 
 Agent skills, MCP servers, and the configuration needed to run them.
 
-The first package is **agent-desktop**: on-demand Hyprland desktops that agents can use for browser and GUI work while your current window keeps focus. It includes the MCP server, CLI helper, skill, nested desktop configuration, and per-user installer.
+| Package | Purpose | Origin |
+|---|---|---|
+| [agent-desktop](packages/agent-desktop/) | On-demand Hyprland desktops, MCP server, CLI helper, skill, and setup | This project |
+| [unslop](packages/unslop/) | Edit AI writing habits out of prose; skill only | Lauren Tan’s pstack, MIT; pinned unchanged upstream copy |
+
+## Install Unslop
+
+From this checkout, run `python3 install-skill.py unslop --client codex` or `--client claude`. Restart the CLI and invoke `$unslop` in Codex or `/unslop` in Claude Code. The installer refuses to replace an existing skill. [Source attribution and T3 notes](packages/unslop/README.md).
 
 ## Install agent-desktop
 
@@ -52,4 +59,4 @@ Do not use the broad Omarchy test suite as a live-session smoke test. GUI verifi
 
 ## License
 
-[MIT](LICENSE).
+Our code is [MIT](LICENSE). Third-party packages retain their original copyright and license notices; Unslop carries [Lauren Tan’s MIT license](packages/unslop/skill/LICENSE).
