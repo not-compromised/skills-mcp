@@ -1,0 +1,24 @@
+#!/bin/bash
+set -euo pipefail
+ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+command -v bwrap >/dev/null || { echo 'Install bubblewrap before running these tests.' >&2; exit 1; }
+NODE=$(readlink -f "$(command -v node)")
+NODE_ROOT=$(dirname "$(dirname "$NODE")")
+npm ci --ignore-scripts --no-audit --no-fund --prefix "$ROOT/packages/agent-desktop/mcp"
+mounts=(--ro-bind /usr /usr --ro-bind /etc /etc --ro-bind /bin /bin --ro-bind /lib /lib)
+[[ ! -d /lib64 ]] || mounts+=(--ro-bind /lib64 /lib64)
+bwrap --unshare-all --die-with-parent --new-session --clearenv \
+  "${mounts[@]}" --ro-bind "$NODE_ROOT" /opt/node --ro-bind "$ROOT" /work \
+  --proc /proc --dev /dev --tmpfs /tmp --dir /home/test \
+  --setenv HOME /home/test --setenv PATH /opt/node/bin:/usr/bin \
+  --setenv PYTHONDONTWRITEBYTECODE 1 --chdir /work/packages/agent-desktop \
+  /bin/bash -euc '
+    test ! -e /run/user
+    test ! -e /dev/dri
+    test -z "${WAYLAND_DISPLAY:-}"
+    test -z "${DBUS_SESSION_BUS_ADDRESS:-}"
+    printf "Isolation verified: no host session sockets or GPU devices\n"
+    python3 -m unittest discover -s test
+    cd mcp
+    node --test test/*.test.js
+  '
