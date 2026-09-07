@@ -18,6 +18,7 @@ bwrap --unshare-all --die-with-parent --new-session --clearenv \
     test -z "${WAYLAND_DISPLAY:-}"
     test -z "${DBUS_SESSION_BUS_ADDRESS:-}"
     printf "Isolation verified: no host session sockets or GPU devices\n"
+    python3 -m unittest discover -s /work/tests
     python3 -m unittest discover -s test
     cd mcp
     node --test test/*.test.js
