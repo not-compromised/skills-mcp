@@ -5,6 +5,7 @@ Agent skills, MCP servers, and the configuration needed to run them.
 | Package | Purpose | Origin |
 |---|---|---|
 | [agent-desktop](packages/agent-desktop/) | On-demand Hyprland desktops, MCP server, CLI helper, skill, and setup | This project |
+| [shot-page](packages/shot-page/) | Temporary private screenshot and recording pages, skill, helper, and hosting setup | This project |
 | [unslop](packages/unslop/) | Edit AI writing habits out of prose; skill only | Lauren Tan’s pstack, MIT; pinned unchanged upstream copy |
 
 ## Install Unslop
