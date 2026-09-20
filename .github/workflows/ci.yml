@@ -1,0 +1,53 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  tests:
+    # Ubuntu 22.04 permits Bubblewrap user namespaces without relaxing host policy.
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: packages/agent-desktop/mcp/package-lock.json
+      - name: Install isolation and recording dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends bubblewrap ffmpeg
+      - name: Run existing isolated suites
+        run: |
+          command -v bwrap ffmpeg ffprobe
+          mkdir -p artifacts
+          set -o pipefail
+          ./test 2>&1 | tee artifacts/tests.log
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: ${{ !cancelled() }}
+        with:
+          name: test-results
+          path: artifacts/
+          retention-days: 7
+          if-no-files-found: ignore
+  ci:
+    name: CI gate
+    if: ${{ always() }}
+    needs: [tests]
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - name: Require isolated tests to succeed
+        env:
+          TEST_RESULT: ${{ needs.tests.result }}
+        run: test "$TEST_RESULT" = success
