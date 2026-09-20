@@ -56,6 +56,15 @@ Install Bubblewrap for test isolation, then run:
 
 The runner installs locked npm dependencies with lifecycle scripts disabled, then runs the package tests in a separate process and network namespace. It supplies a temporary home and no host desktop sockets, session bus, or GPU devices. Tests cover the actual HTTP authentication, client calls, desktop ownership/lifecycle behavior, and installer preservation/rollback.
 
+GitHub Actions runs the same `./test` command on every PR and main push, using
+Node 22 and Ubuntu 22.04 with Bubblewrap and FFmpeg installed. Tests fail if isolation cannot
+start; CI never falls back to accessing the runner's desktop or network. The
+runner's system Python runs the Python suites. Test logs are retained for seven
+days. The final `CI gate` requires an explicit successful test result, including
+when the test job fails or is skipped. Configuring that check as required in
+repository protection is a separate step. CI does not install the desktop
+service or publish packages.
+
 Do not use the broad Omarchy test suite as a live-session smoke test. GUI verification belongs in a disposable graphical environment.
 
 ## License
